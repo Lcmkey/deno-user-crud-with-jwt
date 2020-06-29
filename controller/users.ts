@@ -9,8 +9,11 @@ import {
 
 import User from "./../models/user.ts";
 
-const getUsers = ({ response: res }: { response: Response }) => {
-  res.body = "All Users";
+const getUsers = async ({ response: res }: { response: Response }) => {
+  const users = await User.getAllUsers();
+
+  res.status = 200;
+  res.body = users;
 };
 
 const register = async (

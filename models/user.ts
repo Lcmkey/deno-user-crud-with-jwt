@@ -13,6 +13,12 @@ class UserClass {
 
   collection = DB.collection("users");
 
+  getAllUsers = async () => {
+    const users = await this.collection.find({});
+
+    return users;
+  };
+
   register = async (user: User) => {
     const { email, password } = user;
     const salt = await bcrypt.genSalt(10);
