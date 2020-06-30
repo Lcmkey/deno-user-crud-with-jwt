@@ -9,6 +9,13 @@ class User {
 
   collection = DB.collection("users");
 
+  hashPassword = async (password: string) => {
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(password, salt);
+
+    return hashPassword;
+  };
+
   // Get All Users
   getAllUsers = async () => {
     const users: Array<UserSchema> = await this.collection.find();
@@ -38,8 +45,7 @@ class User {
     const ukey = v4.generate();
     const createdAt = new Date();
     const updatedAt = null;
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(password, salt);
+    const hashPassword = await this.hashPassword(password);
 
     const newUser = {
       ukey,
@@ -87,27 +93,35 @@ class User {
     return { error: true, status: 400, msg: "Email / Password incorrect" };
   };
 
-  updateUser = async (userId: string | undefined, changeData: UserSchema) => {
+  // Update User
+  updateUser = async (ukey: string | undefined, changeData: UserSchema) => {
+    const { password } = changeData;
+    if (password) {
+      changeData.password = await this.hashPassword(password);
+    }
+
+    console.log(changeData);
+    
+
     const { matchedCount, modifiedCount, upsertedId } = await this.collection
-      .updateOne({ _id: { $oid: userId } }, { $set: changeData });
+      .updateOne({ ukey }, { $set: changeData });
 
     if (matchedCount) {
-      return true;
-    } else {
-      return false;
+      return { error: false, status: 200, msg: "success" };
     }
+
+    return { error: false, status: 200, msg: "Update Fail" };
   };
 
-  deleteUser = async (userId: string) => {
-    const isUserDeleted = await this.collection.deleteOne({
-      _id: { $oid: userId },
-    });
+  // Delete User
+  deleteUser = async (ukey: string) => {
+    const isUserDeleted = await this.collection.deleteOne({ ukey });
 
     if (isUserDeleted) {
-      return true;
+      return { error: false, status: 200, msg: "Success" };
     }
 
-    return false;
+    return { error: true, status: 400, msg: "Delete Fail" };
   };
 }
 

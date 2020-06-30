@@ -13,11 +13,11 @@ __Create new User__
 
 __Login__
 
-    $ curl -X POST -H "Content-Type: Application/json" -d '{"email": "sam.leung@test.com", "password": "1234567"}' http://localhost:4000/user/login | jq
+    $ curl -X POST -H "Content-Type: Application/json" -d '{"email": "sam.leung@test.com", "password": "12345678"}' http://localhost:4000/user/login | jq
 
 __Update User__
 
-    $ curl -X PATCH -H "Content-Type: Application/json" -d '{"email": "update@test.com", "password": "1234567"}' http://localhost:4000/user/update/5efa670b002dd16000439174
+    $ curl -X PATCH -H "Content-Type: Application/json" -d '{"email": "sam.leung_update@test.com", "password": "12345678_update"}' http://localhost:4000/user/update/5efa670b002dd16000439174
 
 __Delete User__
 

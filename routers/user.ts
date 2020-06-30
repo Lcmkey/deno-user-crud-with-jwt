@@ -16,7 +16,7 @@ router
   .get<{ ukey: string }>("/:ukey", getUser)
   .post("/register", register)
   .post("/login", login)
-  .patch<{ userId: string }>("/update/:userId", updateUser)
-  .delete<{ userId: string }>("/delete/:userId", deleteUser);
+  .patch<{ ukey: string }>("/update/:ukey", updateUser)
+  .delete<{ ukey: string }>("/delete/:ukey", deleteUser);
 
 export default router;

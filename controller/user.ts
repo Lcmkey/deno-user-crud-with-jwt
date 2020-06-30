@@ -25,7 +25,7 @@ const getUser = async (
 ) => {
   const { ukey } = params;
   const user: UserSchema = await User.getUserByUkey(ukey);
-  
+
   res.status = 200;
   res.body = user;
 };
@@ -95,6 +95,7 @@ const login = async (
   };
 };
 
+// Update User
 const updateUser = async (
   { request: req, response: res, params }: {
     request: Request;
@@ -102,47 +103,41 @@ const updateUser = async (
     params: RouteParams;
   },
 ) => {
-  const { userId } = params;
-  const reqBody = await req.body();
-  const user = reqBody.value;
-  const updateUser = await User.updateUser(userId, user);
+  const { ukey } = params;
 
-  if (updateUser) {
-    res.status = 200;
-    res.body = {
-      msg: "User has been updated",
-    };
-  } else {
-    res.status = 404;
-    res.body = {
-      msg: "User not found",
-    };
+  if (!ukey) {
+    res.status = 400;
+    res.body = { msg: "Invalid ukey" };
+    return;
   }
+
+  const reqBody = await req.body();
+  const user: UserSchema = reqBody.value;
+  const { error, status, msg } = await User.updateUser(
+    ukey,
+    { ...user, updatedAt: new Date() },
+  );
+
+  res.status = status;
+  res.body = { msg };
 };
 
 // Delete User
 const deleteUser = async (
   { response: res, params }: { response: Response; params: RouteParams },
 ) => {
-  const { userId } = params;
+  const { ukey } = params;
 
-  if (!userId) {
+  if (!ukey) {
     res.status = 400;
-    res.body = { error: "Invalid Data" };
+    res.body = { msg: "Invalid ukey" };
     return;
   }
 
-  const deleteUser = await User.deleteUser(userId);
+  const { error, status, msg } = await User.deleteUser(ukey);
 
-  if (deleteUser) {
-    res.status = 200;
-    res.body = {
-      msg: "User has been deleted",
-    };
-  } else {
-    res.status = 404;
-    res.body = "User not found";
-  }
+  res.status = status;
+  res.body = { msg };
 };
 
 export { getUsers, getUser, register, login, updateUser, deleteUser };
