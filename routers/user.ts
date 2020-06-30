@@ -1,5 +1,6 @@
 import { Router } from "./../deps.ts";
 
+import { Auth } from "./../middleware/Auth.ts";
 import {
   getUsers,
   getUser,
@@ -12,7 +13,7 @@ import {
 const router = new Router({ prefix: "/user" });
 
 router
-  .get("/users", getUsers)
+  .get("/all", getUsers)
   .get<{ ukey: string }>("/:ukey", getUser)
   .post("/register", register)
   .post("/login", login)
