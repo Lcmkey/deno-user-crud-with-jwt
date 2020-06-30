@@ -6,7 +6,7 @@ import {
   login,
   updateUser,
   deleteUser,
-} from "./../controller/users.ts";
+} from "./../controller/user.ts";
 
 const router = new Router({ prefix: "/user" });
 

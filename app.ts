@@ -1,30 +1,17 @@
-import { Application, Context } from "./deps.ts";
+import { Dotenv, Application, Context } from "./deps.ts";
 
-import router from "./routers/users.ts";
+import { Timer, Logger, ErrorHandler } from "./middleware/index.ts";
+import router from "./routers/user.ts";
 
 const env = Deno.env.toObject();
-const PORT = env.PORT || 4000;
+const PORT = parseInt(env.PORT!) || 4000;
 const HOST = env.HOST || "localhost";
 const app = new Application();
 
-// setting up oak logger and timer
-app.use(async (ctx: Context, next: Function) => {
-  await next();
-
-  const { method: req_method, url } = ctx.request;
-  const res_time = ctx.response.headers.get("X-Response-Time");
-
-  console.log(`${req_method} ${url} - ${res_time}`);
-});
-
-app.use(async (ctx: Context, next: Function) => {
-  const start = Date.now();
-  await next();
-
-  const ms = Date.now();
-  
-  ctx.response.headers.set("X-Response-Time", `${ms}ms`);
-});
+// middleware
+app.use(Logger);
+app.use(Timer);
+app.use(ErrorHandler);
 
 app.use(router.routes());
 app.use(router.allowedMethods());

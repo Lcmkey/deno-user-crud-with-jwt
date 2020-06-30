@@ -1,6 +1,7 @@
+import * as Dotenv from "https://deno.land/x/dotenv/load.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 
-export { bcrypt };
+export { Dotenv, bcrypt };
 
 export {
   Application,
