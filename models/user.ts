@@ -9,12 +9,14 @@ class User {
 
   collection = DB.collection("users");
 
+  // Get All Users
   getAllUsers = async () => {
-    const users = await this.collection.find({});
+    const users: Array<UserSchema> = await this.collection.find();
 
     return users;
   };
 
+  // Create User
   register = async (user: UserSchema) => {
     const { email, password } = user;
 
@@ -55,12 +57,12 @@ class User {
     };
   };
 
+  // User Login
   login = async (user: UserSchema) => {
     const existedUser = await this.collection.findOne({ email: user.email });
 
     if (!existedUser) {
-      console.log("No such user");
-      return null;
+      return { error: true, status: 404, msg: "User not found" };
     }
 
     const pwConfirmation = await bcrypt.compare(
@@ -68,15 +70,11 @@ class User {
       existedUser.password,
     );
 
-    console.log(existedUser);
-
-    console.log(user.password, existedUser.password);
-    console.log(pwConfirmation);
-
     if (pwConfirmation) {
-      return user;
+      return { error: false, status: 200, msg: "Success" };
     }
-    return null;
+
+    return { error: true, status: 400, msg: "Email / Password incorrect" };
   };
 
   updateUser = async (userId: string | undefined, changeData: UserSchema) => {

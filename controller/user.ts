@@ -11,8 +11,9 @@ import {
 import { UserSchema } from "./../schema/index.ts";
 import { User } from "./../models/index.ts";
 
+// Get All Users
 const getUsers = async ({ response: res }: { response: Response }) => {
-  const users = await User.getAllUsers();
+  const users: Array<UserSchema> = await User.getAllUsers();
 
   res.status = 200;
   res.body = users;
@@ -37,6 +38,7 @@ const register = async (
   res.body = result.data;
 };
 
+// User Login
 const login = async (
   { request: req, response: res }: { request: Request; response: Response },
 ) => {
@@ -48,34 +50,38 @@ const login = async (
     },
   );
 
-  const user = reqBody.value;
-  const { email, password } = user;
-  const login = await User.login({ email, password });
+  const user: UserSchema = reqBody.value;
+  const { email } = user;
+  const login = await User.login(user);
 
-  if (login === null) {
-    console.log("Invalid data enterd");
-    res.status = 404;
-    res.body = "Enterd value input is wrong";
-  } else {
-    const key = "your-jwt-secret-key";
+  if (login.error) {
+    res.status = login.status;
+    res.body = login.msg;
 
-    const payload: Payload = {
-      email,
-      exp: setExpiration(new Date().getTime() + 1 * 60 * 60),
-    };
-    const header: Jose = {
-      alg: "HS256",
-      typ: "JWT",
-    };
-
-    const token = await makeJwt({ header, payload, key });
-    res.status = 200;
-    res.body = {
-      msg: "success",
-      email,
-      token,
-    };
+    return;
   }
+
+  // Get Secret key from env
+  const key = Deno.env.get("JWT_SECRET_KEY")!;
+
+  const payload: Payload = {
+    email,
+    exp: setExpiration(new Date().getTime() + 1 * 60 * 60),
+  };
+  const header: Jose = {
+    alg: "HS256",
+    typ: "JWT",
+  };
+
+  // Create Token
+  const token = await makeJwt({ header, payload, key });
+
+  res.status = 200;
+  res.body = {
+    msg: login.msg,
+    email,
+    token,
+  };
 };
 
 const updateUser = async (
