@@ -1,13 +1,9 @@
-import { bcrypt } from "./../deps.ts";
+import { v4, bcrypt } from "./../deps.ts";
 
 import DB from "./../services/db.ts";
+import { UserSchema } from "./../schema/index.ts";
 
-interface User {
-  email: string;
-  password: string;
-}
-
-class UserClass {
+class User {
   constrictor() {
   }
 
@@ -19,19 +15,47 @@ class UserClass {
     return users;
   };
 
-  register = async (user: User) => {
+  register = async (user: UserSchema) => {
     const { email, password } = user;
+
+    // Check user existed
+    const existedUser = await this.collection.findOne({ email });
+
+    if (existedUser) {
+      return { data: "User already exists", error: true, status: 400 };
+    }
+
+    const ukey = v4.generate();
+    const createdAt = new Date();
+    const updatedAt = null;
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
-    const result = await this.collection.insertOne(
-      { email, password: hashPassword },
+    const newUser = {
+      ukey,
+      email,
+      password: hashPassword,
+      createdAt,
+      updatedAt,
+    };
+
+    // Insert User Data to db
+    await this.collection.insertOne(
+      newUser,
     );
 
-    return console.log("User has been created.");
+    // Get back created user data
+    const userData = await this.collection.findOne({ ukey });
+    delete userData.password;
+
+    return {
+      data: userData,
+      error: false,
+      status: 201,
+    };
   };
 
-  login = async (user: User) => {
+  login = async (user: UserSchema) => {
     const existedUser = await this.collection.findOne({ email: user.email });
 
     if (!existedUser) {
@@ -55,7 +79,7 @@ class UserClass {
     return null;
   };
 
-  updateUser = async (userId: string, changeData: User) => {
+  updateUser = async (userId: string | undefined, changeData: UserSchema) => {
     const { matchedCount, modifiedCount, upsertedId } = await this.collection
       .updateOne({ _id: { $oid: userId } }, { $set: changeData });
 
@@ -79,4 +103,4 @@ class UserClass {
   };
 }
 
-export default new UserClass();
+export default new User();

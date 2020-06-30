@@ -14,7 +14,7 @@ router
   .get("/users", getUsers)
   .post("/register", register)
   .post("/login", login)
-  .patch("/update/:userId", updateUser)
-  .delete("/delete/:userId", deleteUser);
+  .patch<{ userId: string }>("/update/:userId", updateUser)
+  .delete<{ userId: string }>("/delete/:userId", deleteUser);
 
 export default router;

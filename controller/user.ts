@@ -1,4 +1,5 @@
 import {
+  RouteParams,
   Response,
   Request,
   makeJwt,
@@ -7,7 +8,8 @@ import {
   Payload,
 } from "./../deps.ts";
 
-import User from "./../models/user.ts";
+import { UserSchema } from "./../schema/index.ts";
+import { User } from "./../models/index.ts";
 
 const getUsers = async ({ response: res }: { response: Response }) => {
   const users = await User.getAllUsers();
@@ -16,6 +18,7 @@ const getUsers = async ({ response: res }: { response: Response }) => {
   res.body = users;
 };
 
+// Create User Method
 const register = async (
   { request: req, response:res }: { request: Request; response: Response },
 ) => {
@@ -27,11 +30,11 @@ const register = async (
     },
   );
 
-  const user = reqBody.value;
-  const { email, password } = user;
-  User.register({ email, password });
+  const user: UserSchema = reqBody.value;
+  const result = await User.register(user);
 
-  res.body = "success";
+  res.status = result.status;
+  res.body = result.data;
 };
 
 const login = async (
@@ -79,10 +82,10 @@ const updateUser = async (
   { request: req, response: res, params }: {
     request: Request;
     response: Response;
-    params: any;
+    params: RouteParams;
   },
 ) => {
-  const userId = await params.userId;
+  const { userId } = await params;
   const reqBody = await req.body();
   const user = reqBody.value;
   const updateUser = await User.updateUser(userId, user);
@@ -100,10 +103,18 @@ const updateUser = async (
   }
 };
 
+// Delete User
 const deleteUser = async (
-  { response: res, params }: { response: Response; params: any },
+  { response: res, params }: { response: Response; params: RouteParams },
 ) => {
-  const userId = await params.userId;
+  const { userId } = await params;
+
+  if (!userId) {
+    res.status = 400;
+    res.body = { error: "Invalid Data" };
+    return;
+  }
+
   const deleteUser = await User.deleteUser(userId);
 
   if (deleteUser) {
