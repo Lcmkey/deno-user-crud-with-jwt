@@ -2,6 +2,7 @@ import { Router } from "./../deps.ts";
 
 import {
   getUsers,
+  getUser,
   register,
   login,
   updateUser,
@@ -12,6 +13,7 @@ const router = new Router({ prefix: "/user" });
 
 router
   .get("/users", getUsers)
+  .get<{ ukey: string }>("/:ukey", getUser)
   .post("/register", register)
   .post("/login", login)
   .patch<{ userId: string }>("/update/:userId", updateUser)

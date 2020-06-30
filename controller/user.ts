@@ -19,6 +19,17 @@ const getUsers = async ({ response: res }: { response: Response }) => {
   res.body = users;
 };
 
+// Get User by ukey
+const getUser = async (
+  { response: res, params }: { response: Response; params: RouteParams },
+) => {
+  const { ukey } = params;
+  const user: UserSchema = await User.getUserByUkey(ukey);
+  
+  res.status = 200;
+  res.body = user;
+};
+
 // Create User Method
 const register = async (
   { request: req, response:res }: { request: Request; response: Response },
@@ -74,7 +85,7 @@ const login = async (
   };
 
   // Create Token
-  const token = await makeJwt({ header, payload, key });
+  const token = makeJwt({ header, payload, key });
 
   res.status = 200;
   res.body = {
@@ -91,7 +102,7 @@ const updateUser = async (
     params: RouteParams;
   },
 ) => {
-  const { userId } = await params;
+  const { userId } = params;
   const reqBody = await req.body();
   const user = reqBody.value;
   const updateUser = await User.updateUser(userId, user);
@@ -113,7 +124,7 @@ const updateUser = async (
 const deleteUser = async (
   { response: res, params }: { response: Response; params: RouteParams },
 ) => {
-  const { userId } = await params;
+  const { userId } = params;
 
   if (!userId) {
     res.status = 400;
@@ -134,4 +145,4 @@ const deleteUser = async (
   }
 };
 
-export { getUsers, register, login, updateUser, deleteUser };
+export { getUsers, getUser, register, login, updateUser, deleteUser };

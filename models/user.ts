@@ -16,6 +16,14 @@ class User {
     return users;
   };
 
+  // Get All Users
+  getUserByUkey = async (ukey: string | undefined) => {
+    const user: UserSchema = await this.collection.findOne({ ukey });
+    delete user.password;
+
+    return user;
+  };
+
   // Create User
   register = async (user: UserSchema) => {
     const { email, password } = user;
@@ -59,12 +67,14 @@ class User {
 
   // User Login
   login = async (user: UserSchema) => {
+    // Check User Existed
     const existedUser = await this.collection.findOne({ email: user.email });
 
     if (!existedUser) {
       return { error: true, status: 404, msg: "User not found" };
     }
 
+    // Check Password Correct or not
     const pwConfirmation = await bcrypt.compare(
       user.password,
       existedUser.password,
