@@ -13,11 +13,11 @@ import {
 const router = new Router({ prefix: "/user" });
 
 router
-  .get("/all", getUsers)
-  .get<{ ukey: string }>("/:ukey", getUser)
+  .get("/all", Auth, getUsers)
+  .get<{ ukey: string }>("/:ukey", Auth, getUser)
   .post("/register", register)
   .post("/login", login)
-  .patch<{ ukey: string }>("/update/:ukey", updateUser)
-  .delete<{ ukey: string }>("/delete/:ukey", deleteUser);
+  .patch<{ ukey: string }>("/update/:ukey", Auth, updateUser)
+  .delete<{ ukey: string }>("/delete/:ukey", Auth, deleteUser);
 
 export default router;

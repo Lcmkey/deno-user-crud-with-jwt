@@ -1,5 +1,7 @@
 import { Request, Response, validateJwt } from "./../deps.ts";
 
+import { validateToken } from "./Token.ts";
+
 const Auth = async (
   { request: req, response: res }: { request: Request; response: Response },
   next: any,
@@ -22,9 +24,8 @@ const Auth = async (
     return;
   }
 
-  // Get Secret key from env
-  const key = Deno.env.get("JWT_SECRET_KEY")!;
-  const validToken = await validateJwt(jwt, key, { isThrowing: false });
+  // Verify Token
+  const validToken = await validateToken(jwt);
 
   if (validToken) {
     await next();

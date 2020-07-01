@@ -1,13 +1,6 @@
-import {
-  RouteParams,
-  Response,
-  Request,
-  makeJwt,
-  setExpiration,
-  Jose,
-  Payload,
-} from "./../deps.ts";
+import { RouteParams, Response, Request } from "./../deps.ts";
 
+import { generateToken } from "./../middleware/Token.ts";
 import { UserSchema } from "./../schema/index.ts";
 import { User } from "./../models/index.ts";
 
@@ -25,6 +18,12 @@ const getUser = async (
 ) => {
   const { ukey } = params;
   const user: UserSchema = await User.getUserByUkey(ukey);
+
+  if (!user) {
+    res.status = 404;
+    res.body = { msg: "No such user" };
+    return;
+  }
 
   res.status = 200;
   res.body = user;
@@ -72,20 +71,8 @@ const login = async (
     return;
   }
 
-  // Get Secret key from env
-  const key = Deno.env.get("JWT_SECRET_KEY")!;
-
-  const payload: Payload = {
-    email,
-    exp: setExpiration(new Date().getTime() + 1 * 60 * 60),
-  };
-  const header: Jose = {
-    alg: "HS256",
-    typ: "JWT",
-  };
-
   // Create Token
-  const token = makeJwt({ header, payload, key });
+  const token = generateToken(email);
 
   res.status = 200;
   res.body = {

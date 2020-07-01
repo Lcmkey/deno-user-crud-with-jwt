@@ -25,8 +25,14 @@ class User {
 
   // Get All Users
   getUserByUkey = async (ukey: string | undefined) => {
+    console.log(ukey);
+
     const user: UserSchema = await this.collection.findOne({ ukey });
-    delete user.password;
+
+    // Delete sensitive info here
+    if (user) {
+      delete user.password;
+    }
 
     return user;
   };
@@ -101,7 +107,6 @@ class User {
     }
 
     console.log(changeData);
-    
 
     const { matchedCount, modifiedCount, upsertedId } = await this.collection
       .updateOne({ ukey }, { $set: changeData });

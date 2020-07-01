@@ -5,7 +5,11 @@
 ---
 __Get All Users__
 
-    $ curl http://localhost:4000/user/users | jq
+    $ curl -H "Authorization: Bearer ${YOUR-TOKEN}" http://localhost:4000/user/all | jq
+
+__Get User By ukey__
+
+    $ curl -H "Authorization: Bearer ${YOUR-TOKEN}" http://localhost:4000/user/${ukey} | jq
 
 __Create new User__
 
@@ -17,8 +21,8 @@ __Login__
 
 __Update User__
 
-    $ curl -X PATCH -H "Content-Type: Application/json" -d '{"email": "sam.leung_update@test.com", "password": "12345678_update"}' http://localhost:4000/user/update/5efa670b002dd16000439174
+    $ curl -X PATCH -H "Content-Type: Application/json" -H "Authorization: Bearer ${YOUR-TOKEN}" -d '{"email": "sam.leung_update@test.com", "password": "12345678_update"}' http://localhost:4000/user/update/${ukey}
 
 __Delete User__
 
-    $ curl -X DELETE http://localhost:4000/user/delete/5efa670b002dd16000439174
+    $ curl -X DELETE -H "Authorization: Bearer ${YOUR-TOKEN}" http://localhost:4000/user/delete/${ukey}
