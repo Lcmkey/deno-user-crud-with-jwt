@@ -1,4 +1,10 @@
-### How to Run
+# User Collection Structure
+
+![Alt text](./images/User.png)
+
+&thinsp;
+
+# How to Run
 
 1. Create .env file with .env.sample content && change the env you want
 
