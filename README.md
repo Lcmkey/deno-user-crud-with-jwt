@@ -1,6 +1,14 @@
 ### How to Run
 
+1. Create .env file with .env.sample content && change the env you want
+
+2. use make cmd to run the applocation
+
     $ make run
+
+or
+
+    $ make denon
 
 ---
 __Get Mockup Data__
