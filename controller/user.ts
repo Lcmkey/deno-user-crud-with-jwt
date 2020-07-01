@@ -4,6 +4,14 @@ import { Token } from "./../services/Token.ts";
 import { UserSchema } from "./../schema/index.ts";
 import { User } from "./../models/index.ts";
 
+// Get Mockup Data
+const getMockupData = async ({ response: res }: { response: Response }) => {
+  const users: Array<UserSchema> = await User.getMockupData();
+
+  res.status = 200;
+  res.body = users;
+};
+
 // Get All Users
 const getUsers = async ({ response: res }: { response: Response }) => {
   const users: Array<UserSchema> = await User.getAllUsers();
@@ -132,4 +140,12 @@ const deleteUser = async (
   res.body = { msg };
 };
 
-export { getUsers, getUser, register, login, updateUser, deleteUser };
+export {
+  getMockupData,
+  getUsers,
+  getUser,
+  register,
+  login,
+  updateUser,
+  deleteUser,
+};

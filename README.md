@@ -3,6 +3,10 @@
     $ make run
 
 ---
+__Get Mockup Data__
+
+    $ curl localhost:4000/user/mockup | jq
+
 __Get All Users__
 
     $ curl -H "Authorization: Bearer ${YOUR-TOKEN}" http://localhost:4000/user/all | jq

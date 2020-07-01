@@ -3,6 +3,9 @@ import { v4, bcrypt } from "./../deps.ts";
 import DB from "./../services/DB.ts";
 import { UserSchema, UserDataResultSchema } from "./../schema/index.ts";
 
+const FILE_PATH = "user.json";
+const decoder = new TextDecoder();
+
 class User {
   constrictor() {
   }
@@ -14,6 +17,14 @@ class User {
     const hashPassword = await bcrypt.hash(password, salt);
 
     return hashPassword;
+  };
+
+  // get Mockup Data
+  getMockupData = async () => {
+    const data = await Deno.readFile(`${Deno.cwd()}/data/${FILE_PATH}`);
+    let users = JSON.parse(decoder.decode(data));
+
+    return users;
   };
 
   // Get All Users

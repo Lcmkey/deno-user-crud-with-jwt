@@ -2,6 +2,7 @@ import { Router } from "./../deps.ts";
 
 import { Auth } from "./../middleware/Auth.ts";
 import {
+  getMockupData,
   getUsers,
   getUser,
   register,
@@ -13,6 +14,7 @@ import {
 const router = new Router({ prefix: "/user" });
 
 router
+  .get("/mockup", getMockupData)
   .get("/all", Auth, getUsers)
   .get<{ ukey: string }>("/:ukey", Auth, getUser)
   .post("/register", register)
