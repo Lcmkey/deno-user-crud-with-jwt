@@ -8,6 +8,6 @@ const client = new MongoClient();
 client.connectWithUri(MONGO_URL);
 
 // creat a database
-const db = client.database(DATABASE);
+const DB = client.database(DATABASE);
 
-export default db;
+export default DB;

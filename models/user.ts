@@ -1,7 +1,7 @@
 import { v4, bcrypt } from "./../deps.ts";
 
-import DB from "./../services/db.ts";
-import { UserSchema } from "./../schema/index.ts";
+import DB from "./../services/DB.ts";
+import { UserSchema, UserDataResultSchema } from "./../schema/index.ts";
 
 class User {
   constrictor() {
@@ -17,16 +17,14 @@ class User {
   };
 
   // Get All Users
-  getAllUsers = async () => {
+  getAllUsers = async (): Promise<Array<UserSchema>> => {
     const users: Array<UserSchema> = await this.collection.find();
 
     return users;
   };
 
   // Get All Users
-  getUserByUkey = async (ukey: string | undefined) => {
-    console.log(ukey);
-
+  getUserByUkey = async (ukey: string | undefined): Promise<UserSchema> => {
     const user: UserSchema = await this.collection.findOne({ ukey });
 
     // Delete sensitive info here
@@ -38,14 +36,22 @@ class User {
   };
 
   // Create User
-  register = async (user: UserSchema) => {
+  register = async (user: UserSchema): Promise<UserDataResultSchema> => {
     const { email, password } = user;
 
     // Check user existed
     const existedUser = await this.collection.findOne({ email });
+    let result = { error: false, status: 200, msg: "Success", data: {} };
 
     if (existedUser) {
-      return { data: "User already exists", error: true, status: 400 };
+      result = {
+        ...result,
+        error: true,
+        status: 400,
+        msg: "User already exists",
+      };
+
+      return result;
     }
 
     const ukey = v4.generate();
@@ -62,28 +68,32 @@ class User {
     };
 
     // Insert User Data to db
-    await this.collection.insertOne(
-      newUser,
-    );
+    await this.collection.insertOne(newUser);
 
     // Get back created user data
     const userData = await this.collection.findOne({ ukey });
     delete userData.password;
 
-    return {
-      data: userData,
-      error: false,
-      status: 201,
-    };
+    result = { ...result, error: false, status: 201, data: userData };
+
+    return result;
   };
 
   // User Login
-  login = async (user: UserSchema) => {
+  login = async (user: UserSchema): Promise<UserDataResultSchema> => {
     // Check User Existed
     const existedUser = await this.collection.findOne({ email: user.email });
+    let result = { error: false, status: 200, msg: "Success", data: {} };
 
     if (!existedUser) {
-      return { error: true, status: 404, msg: "User not found" };
+      result = {
+        ...result,
+        error: true,
+        status: 404,
+        msg: "User not found",
+      };
+
+      return result;
     }
 
     // Check Password Correct or not
@@ -93,40 +103,51 @@ class User {
     );
 
     if (pwConfirmation) {
-      return { error: false, status: 200, msg: "Success" };
+      result = { ...result, data: existedUser };
+
+      return result;
     }
 
-    return { error: true, status: 400, msg: "Email / Password incorrect" };
+    return {
+      ...result,
+      error: true,
+      status: 400,
+      msg: "Email / Password incorrect",
+    };
   };
 
   // Update User
-  updateUser = async (ukey: string | undefined, changeData: UserSchema) => {
+  updateUser = async (
+    ukey: string | undefined,
+    changeData: UserSchema,
+  ): Promise<UserDataResultSchema> => {
+    let result = { error: false, status: 200, msg: "Success", data: {} };
     const { password } = changeData;
+
     if (password) {
       changeData.password = await this.hashPassword(password);
     }
-
-    console.log(changeData);
 
     const { matchedCount, modifiedCount, upsertedId } = await this.collection
       .updateOne({ ukey }, { $set: changeData });
 
     if (matchedCount) {
-      return { error: false, status: 200, msg: "success" };
+      return result;
     }
 
-    return { error: false, status: 200, msg: "Update Fail" };
+    return { ...result, error: false, status: 400, msg: "Update Fail" };
   };
 
   // Delete User
-  deleteUser = async (ukey: string) => {
+  deleteUser = async (ukey: string): Promise<UserDataResultSchema> => {
+    let result = { error: false, status: 200, msg: "Success", data: {} };
     const isUserDeleted = await this.collection.deleteOne({ ukey });
 
     if (isUserDeleted) {
-      return { error: false, status: 200, msg: "Success" };
+      return result;
     }
 
-    return { error: true, status: 400, msg: "Delete Fail" };
+    return { ...result, error: true, status: 400, msg: "Delete Fail" };
   };
 }
 

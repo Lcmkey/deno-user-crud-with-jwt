@@ -1,6 +1,6 @@
 import { RouteParams, Response, Request } from "./../deps.ts";
 
-import { generateToken } from "./../middleware/Token.ts";
+import { Token } from "./../services/Token.ts";
 import { UserSchema } from "./../schema/index.ts";
 import { User } from "./../models/index.ts";
 
@@ -19,14 +19,8 @@ const getUser = async (
   const { ukey } = params;
   const user: UserSchema = await User.getUserByUkey(ukey);
 
-  if (!user) {
-    res.status = 404;
-    res.body = { msg: "No such user" };
-    return;
-  }
-
   res.status = 200;
-  res.body = user;
+  res.body = user ? user : { msg: "No such user" };
 };
 
 // Create User Method
@@ -43,6 +37,15 @@ const register = async (
 
   const user: UserSchema = reqBody.value;
   const result = await User.register(user);
+
+  if (result.error) {
+    const { msg } = result;
+
+    res.status = result.status;
+    res.body = { msg };
+
+    return;
+  }
 
   res.status = result.status;
   res.body = result.data;
@@ -62,21 +65,23 @@ const login = async (
 
   const user: UserSchema = reqBody.value;
   const { email } = user;
-  const login = await User.login(user);
+  const result = await User.login(user);
 
-  if (login.error) {
-    res.status = login.status;
-    res.body = login.msg;
+  if (result.error) {
+    const { msg } = result;
+
+    res.status = result.status;
+    res.body = { msg };
 
     return;
   }
 
   // Create Token
-  const token = generateToken(email);
+  const token = Token.create(result.data.ukey);
 
   res.status = 200;
   res.body = {
-    msg: login.msg,
+    msg: result.msg,
     email,
     token,
   };
@@ -100,7 +105,7 @@ const updateUser = async (
 
   const reqBody = await req.body();
   const user: UserSchema = reqBody.value;
-  const { error, status, msg } = await User.updateUser(
+  const { status, msg } = await User.updateUser(
     ukey,
     { ...user, updatedAt: new Date() },
   );
@@ -121,7 +126,7 @@ const deleteUser = async (
     return;
   }
 
-  const { error, status, msg } = await User.deleteUser(ukey);
+  const { status, msg } = await User.deleteUser(ukey);
 
   res.status = status;
   res.body = { msg };

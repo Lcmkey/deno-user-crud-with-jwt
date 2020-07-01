@@ -1,6 +1,6 @@
 import { Request, Response, validateJwt } from "./../deps.ts";
 
-import { validateToken } from "./Token.ts";
+import { Token } from "./../services/Token.ts";
 
 const Auth = async (
   { request: req, response: res }: { request: Request; response: Response },
@@ -25,7 +25,7 @@ const Auth = async (
   }
 
   // Verify Token
-  const validToken = await validateToken(jwt);
+  const validToken = await Token.validation(jwt);
 
   if (validToken) {
     await next();

@@ -1,1 +1,1 @@
-export { UserSchema } from "./user.ts";
+export { UserSchema, UserDataResultSchema } from "./user.ts";
