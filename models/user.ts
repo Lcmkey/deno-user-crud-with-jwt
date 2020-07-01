@@ -6,37 +6,34 @@ import { UserSchema, UserDataResultSchema } from "./../schema/index.ts";
 const FILE_PATH = "user.json";
 const decoder = new TextDecoder();
 
-class User {
-  constrictor() {
-  }
+const Users = DB.collection("users");
 
-  collection = DB.collection("users");
-
-  hashPassword = async (password: string) => {
+const User = {
+  hashPassword: async (password: string) => {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
     return hashPassword;
-  };
+  },
 
   // get Mockup Data
-  getMockupData = async () => {
+  getMockupData: async () => {
     const data = await Deno.readFile(`${Deno.cwd()}/data/${FILE_PATH}`);
     let users = JSON.parse(decoder.decode(data));
 
     return users;
-  };
+  },
 
   // Get All Users
-  getAllUsers = async (): Promise<Array<UserSchema>> => {
-    const users: Array<UserSchema> = await this.collection.find();
+  getAllUsers: async (): Promise<Array<UserSchema>> => {
+    const users: Array<UserSchema> = await Users.find();
 
     return users;
-  };
+  },
 
   // Get All Users
-  getUserByUkey = async (ukey: string | undefined): Promise<UserSchema> => {
-    const user: UserSchema = await this.collection.findOne({ ukey });
+  getUserByUkey: async (ukey: string | undefined): Promise<UserSchema> => {
+    const user: UserSchema = await Users.findOne({ ukey });
 
     // Delete sensitive info here
     if (user) {
@@ -44,14 +41,14 @@ class User {
     }
 
     return user;
-  };
+  },
 
   // Create User
-  register = async (user: UserSchema): Promise<UserDataResultSchema> => {
+  register: async (user: UserSchema): Promise<UserDataResultSchema> => {
     const { email, password } = user;
 
     // Check user existed
-    const existedUser = await this.collection.findOne({ email });
+    const existedUser = await Users.findOne({ email });
     let result = { error: false, status: 200, msg: "Success", data: {} };
 
     if (existedUser) {
@@ -68,7 +65,7 @@ class User {
     const ukey = v4.generate();
     const createdAt = new Date();
     const updatedAt = null;
-    const hashPassword = await this.hashPassword(password);
+    const hashPassword = await User.hashPassword(password);
 
     const newUser = {
       ukey,
@@ -79,21 +76,21 @@ class User {
     };
 
     // Insert User Data to db
-    await this.collection.insertOne(newUser);
+    await Users.insertOne(newUser);
 
     // Get back created user data
-    const userData = await this.collection.findOne({ ukey });
+    const userData = await Users.findOne({ ukey });
     delete userData.password;
 
     result = { ...result, error: false, status: 201, data: userData };
 
     return result;
-  };
+  },
 
   // User Login
-  login = async (user: UserSchema): Promise<UserDataResultSchema> => {
+  login: async (user: UserSchema): Promise<UserDataResultSchema> => {
     // Check User Existed
-    const existedUser = await this.collection.findOne({ email: user.email });
+    const existedUser = await Users.findOne({ email: user.email });
     let result = { error: false, status: 200, msg: "Success", data: {} };
 
     if (!existedUser) {
@@ -125,10 +122,10 @@ class User {
       status: 400,
       msg: "Email / Password incorrect",
     };
-  };
+  },
 
   // Update User
-  updateUser = async (
+  updateUser: async (
     ukey: string | undefined,
     changeData: UserSchema,
   ): Promise<UserDataResultSchema> => {
@@ -136,10 +133,10 @@ class User {
     const { password } = changeData;
 
     if (password) {
-      changeData.password = await this.hashPassword(password);
+      changeData.password = await User.hashPassword(password);
     }
 
-    const { matchedCount, modifiedCount, upsertedId } = await this.collection
+    const { matchedCount, modifiedCount, upsertedId } = await Users
       .updateOne({ ukey }, { $set: changeData });
 
     if (matchedCount) {
@@ -147,19 +144,19 @@ class User {
     }
 
     return { ...result, error: false, status: 400, msg: "Update Fail" };
-  };
+  },
 
   // Delete User
-  deleteUser = async (ukey: string): Promise<UserDataResultSchema> => {
+  deleteUser: async (ukey: string): Promise<UserDataResultSchema> => {
     let result = { error: false, status: 200, msg: "Success", data: {} };
-    const isUserDeleted = await this.collection.deleteOne({ ukey });
+    const isUserDeleted = await Users.deleteOne({ ukey });
 
     if (isUserDeleted) {
       return result;
     }
 
     return { ...result, error: true, status: 400, msg: "Delete Fail" };
-  };
-}
+  },
+};
 
-export default new User();
+export { User };
